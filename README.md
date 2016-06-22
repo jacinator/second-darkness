@@ -16,7 +16,7 @@ quite weak (Beornings or the Ents).
 
 Have fun with this, and leave a comment or an issue or something.
 
-God bless,
+God bless,<br>
 jacinator
 
 \*<a href="http://www.middleearth.com/">www.middleearth.com</a> seems to have as good a claim as
