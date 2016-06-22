@@ -15,8 +15,8 @@ There are a lot of factions and some of them are quite strong (Mordor or Gondor)
 quite weak (Beornings or the Ents).
 
 I have no rights to any of this nor am I trying to recreate this for general distribution, I am
-merely using this as a combination of two of my passions, namely <em>The Lord of the Rigns</em>
-and Python.
+merely using this as an opportunity for me to learn through a combination of two of my passions,
+namely <em>The Lord of the Rigns</em> and Python.
 
 Have fun with this, and leave a comment or an issue or something.
 
