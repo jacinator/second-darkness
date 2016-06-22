@@ -14,6 +14,10 @@ faction go to ```<faction_folder>/__init__.py``` and change ```AI = True``` to `
 There are a lot of factions and some of them are quite strong (Mordor or Gondor), while others are
 quite weak (Beornings or the Ents).
 
+I have no rights to any of this nor am I trying to recreate this for general distribution, I am
+merely using this as a combination of two of my passions, namely <em>The Lord of the Rigns</em>
+and Python.
+
 Have fun with this, and leave a comment or an issue or something.
 
 God bless,<br>
