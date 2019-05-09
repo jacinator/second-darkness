@@ -88,6 +88,16 @@ class Region(object):
     def has_army(self):
         return len(self.army.keys())
 
+    def move_units(self, nation, to):
+        units = {}
+
+        for unit, count in self.army.items():
+            if nation in unit.nations:
+                units[unit] = count
+
+        to.add_units(units)
+        self.sub_units(units)
+
     @decorators.action("attack")
     def action_attack(self, nation):
         try:
@@ -96,20 +106,22 @@ class Region(object):
                 lambda r: r.occupants != nation and r.name in self.neighbors,
             ).choose()
         except errors.EmptyChoicesError:
-            # TODO: Add a response to not being able to attack.
-            pass
+            print("{} cannot attack from {} - there aren't any enemies nearby!".format(
+                strings.capitalize(nation.name),
+                self.name,
+            ))
         else:
             battles.battle(nation, self, against)
 
             if not against.has_army():
                 against.occupants = self.occupants
-                self.action_move(nation, against)
+                self.move_units(nation, against)
 
-            return tables.TableList(
+            print(tables.TableList(
                 "Unit statuses",
                 self.get_units_report(),
                 against.get_units_report(),
-            ).render()
+            ).render())
 
     @decorators.action("details")
     def action_details(self, nation):
@@ -123,27 +135,24 @@ class Region(object):
                 lambda r: r.occupants == nation and r.name in self.neighbors,
             ).choose()
         except errors.EmptyChoicesError:
-            # TODO: Add a response to not being able to move.
-            pass
+            print("{} cannot move from {} - there aren't any friendly regions nearby!".format(
+                strings.capitalize(nation.name),
+                self.name,
+            ))
         else:
-            units = {}
-
-            for unit, count in self.army.items():
-                if nation in unit.nations:
-                    units[unit] = count
-
-            to.add_units(units)
-            self.sub_units(units)
+            self.move_units(nation, to)
 
     @decorators.action("review")
     def action_review(self, nation):
         print(self.get_units_report())
 
     @decorators.action("recruit")
-    # def action_recruit(self, units):
     def action_recruit(self, nation):
         # TODO: Add a menu to show how many and what units should be
         # recruited here.
+
+        # `units` should be a dictionary of unit types mapped to
+        # integers showing how many of them.
 
         for unit, count in units.items():
             count = min(int(nation.resources / unit.cost), count)
