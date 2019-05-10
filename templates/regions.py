@@ -12,7 +12,7 @@ def clean_units(method):
     @functools.wraps(method)
     def inner(self, units):
         for unit, count in units.items():
-            method(unit, count)
+            method(self, unit, count)
         for unit in [u for u, c in self.army.items() if c <= 0]:
             del self.army[unit]
     return inner
