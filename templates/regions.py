@@ -80,9 +80,12 @@ class Region(object):
     def get_strength(self):
         return sum(self.army.values())
 
-    def get_units_report(self):
+    def get_units_report(self, nation=None):
+        if nation is None:
+            nation = self.occupants
+
         heading = [("Name", "Number", "Offense", "Defense")]
-        content = list(map(get_unit_row, self.army.items()))
+        content = list(map(get_unit_row, [x for x in self.army.items() if nation in x[0].nations]))
         return tables.Table(heading + content).render()
 
     def has_army(self):
@@ -144,7 +147,7 @@ class Region(object):
 
     @decorators.action("review")
     def action_review(self, nation):
-        print(self.get_units_report())
+        print(self.get_units_report(nation))
 
     @decorators.action("recruit")
     def action_recruit(self, nation):
