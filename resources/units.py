@@ -68,7 +68,7 @@ haradrim = units.MilitiaUnit(
 
 knights = units.CavalryUnit(
     name="Knights",
-    nations=[nations.arnor, nations.dol_amroth, nations.mithlond, nations.rivendell],
+    nations=[nations.arnor, nations.dol_amroth, nations.gondor, nations.mithlond, nations.rivendell],
 )
 
 lancers = units.CavalryUnit(
