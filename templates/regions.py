@@ -1,7 +1,7 @@
 import functools
 
 from functions import battles, strings, tables
-from functions.menus import ObjectMenu, decorators, errors
+from functions.menus import ObjectMenu, UnitObjectMenu, decorators, errors
 
 
 def get_unit_row(args):
@@ -151,11 +151,24 @@ class Region(object):
 
     @decorators.action("recruit")
     def action_recruit(self, nation):
-        # TODO: Add a menu to show how many and what units should be
-        # recruited here.
+        unit_menu = UnitObjectMenu(nation, self)
+        units = {}
+        _continue = "Y"
 
-        # `units` should be a dictionary of unit types mapped to
-        # integers showing how many of them.
+        while _continue == "Y":
+            unit_type = unit_menu.choose()
+            unit_numb = None
+            while unit_numb is None:
+                try:
+                    unit_numb = int(input("How many units of {} would you like to recruit? ".format(unit_type)))
+                except ValueError:
+                    print("Invalid number")
+            units[unit_type] = unit_numb
+
+            try:
+                _continue = input("Continue [y/N] > ")[0].upper()
+            except IndexError:
+                _continue = ""
 
         for unit, count in units.items():
             count = min(int(nation.resources / unit.cost), count)
@@ -166,3 +179,8 @@ class Region(object):
             else:
                 nation.resources -= unit.cost * count
         self.add_units(units)
+
+        print(tables.TableList("Recruited these units", tables.Table((
+            ("Name", "Count", "Offense", "Defense",),
+            *map(get_unit_row, units.items()),
+        )).render()).render())
