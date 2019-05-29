@@ -1,7 +1,7 @@
 import functools
 
 from functions import battles, strings, tables
-from functions.menus import ObjectMenu, UnitObjectMenu, decorators, errors
+from functions.menus import ObjectMenu, decorators, errors
 
 
 def get_unit_row(args):
@@ -151,7 +151,10 @@ class Region(object):
 
     @decorators.action("recruit")
     def action_recruit(self, nation):
-        unit_menu = UnitObjectMenu(nation, self)
+        unit_menu = ObjectMenu(
+            nation.army,
+            lambda u: u.developed <= self.developed,
+        )
         units = {}
         _continue = "Y"
 

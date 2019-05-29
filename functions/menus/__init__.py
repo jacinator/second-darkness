@@ -37,9 +37,3 @@ class RegionActionMenu(ActionMenu):
     def choose(self):
         action = super().choose()
         return action(self.region, self.nation)
-
-
-class UnitObjectMenu(ObjectMenu):
-
-    def __init__(self, nation, region):
-        super().__init__(nation.army, lambda u: u.developed <= region.developed)
