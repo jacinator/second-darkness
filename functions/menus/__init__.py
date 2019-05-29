@@ -16,6 +16,17 @@ class ObjectMenu(bases.MainMenu):
         super().__init__(choices)
 
 
+class NationActionMenu(ActionMenu):
+
+    def __init__(self, nation):
+        self.nation = nation
+        super().__init__(nation)
+
+    def choose(self):
+        action = super().choose()
+        return action(self.nation)
+
+
 class RegionActionMenu(ActionMenu):
 
     def __init__(self, nation, region):
