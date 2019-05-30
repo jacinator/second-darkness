@@ -23,13 +23,13 @@ class Nation(object):
     def __str__(self):
         return self.name
 
-    @decorators.action("nations")
+    @decorators.action("Regions")
     def action_nations(self):
         region_menu = ObjectMenu(Region.objects, lambda r: r.occupants is self)
         action_menu = RegionActionMenu(self, region_menu.choose())
         action_menu.choose()
 
-    @decorators.action("resources")
+    @decorators.action("Resources")
     def action_resources(self):
         print(tables.Table((
             ("Resources", "$ {}".format(self.resources)),

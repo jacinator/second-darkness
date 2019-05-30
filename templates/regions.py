@@ -101,7 +101,7 @@ class Region(object):
         to.add_units(units)
         self.sub_units(units)
 
-    @decorators.action("attack")
+    @decorators.action("Attack")
     def action_attack(self, nation):
         try:
             against = ObjectMenu(
@@ -126,11 +126,11 @@ class Region(object):
                 against.get_units_report(),
             ).render())
 
-    @decorators.action("details")
+    @decorators.action("Details")
     def action_details(self, nation):
         print(self.get_neighbor_reports())
 
-    @decorators.action("move")
+    @decorators.action("Move")
     def action_move(self, nation):
         try:
             to = ObjectMenu(
@@ -145,11 +145,11 @@ class Region(object):
         else:
             self.move_units(nation, to)
 
-    @decorators.action("review")
+    @decorators.action("Review")
     def action_review(self, nation):
         print(self.get_units_report(nation))
 
-    @decorators.action("recruit")
+    @decorators.action("Recruit")
     def action_recruit(self, nation):
         unit_menu = ObjectMenu(
             nation.army,
