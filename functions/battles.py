@@ -1,14 +1,14 @@
-import random
+from random import choice
 
 def get_damage(army, type):
-    return sum([sum([getattr(u,'get_{}_damage'.format(type))() for _ in range(c)]) for u, c in army.items()])
+    return sum(getattr(u, "get_{}_damage".format(type)) for u, c in army.items() for _ in range(c))
 
 def get_casualties(a, b, type):
     casualties = {}
 
     for _ in range(get_damage(a, type)):
         try:
-            unit = random.choice(tuple(b.keys()))
+            unit = choice(tuple(b.keys()))
         except IndexError:
             break
 
@@ -26,8 +26,8 @@ def battle(nation, offense, defense):
         if nation in unit.nations:
             offense_army[unit] = count
 
-    offense_casualties = get_casualties(defense.army, offense_army, 'defense')
-    defense_casualties = get_casualties(offense_army, defense.army, 'offense')
+    offense_casualties = get_casualties(defense.army, offense_army, "defense")
+    defense_casualties = get_casualties(offense_army, defense.army, "offense")
 
     offense.sub_units(offense_casualties)
     defense.sub_units(defense_casualties)
