@@ -1,7 +1,8 @@
-import operator
+from operator import attrgetter
 
-from functions import tables
-from functions.menus import ObjectMenu, RegionActionMenu, decorators
+from functions.tables import Table
+from functions.menus import ObjectMenu, RegionActionMenu
+from functions.menus.decorators import action
 
 from .regions import Region
 
@@ -26,42 +27,26 @@ class Nation(object):
     def __str__(self):
         return self.name
 
-    @decorators.action("Regions")
+    # ##### Information Retrieval ##### #
+    # These methods are here to get and return information about this
+    # Nation object.
+
+    def get_income(self):
+        return sum(r.resources for r in Region.objects if r.occupants is self)
+
+    # ##### Menu Actions ##### #
+    # These methods are put in place to allow the NationActionMenu to
+    # properly manipulate and get information from Nation objects.
+
+    @action("Regions")
     def action_nations(self):
         region_menu = ObjectMenu(Region.objects, lambda r: r.occupants is self)
         action_menu = RegionActionMenu(self, region_menu.choose())
         action_menu.choose()
 
-    @decorators.action("Resources")
+    @action("Resources")
     def action_resources(self):
-        print(tables.Table((
+        print(Table((
             ("Resources", "$ {}".format(self.resources)),
-            ("Income", "$ {}".format(sum(map(
-                operator.attrgetter("resources"),
-                filter(lambda r: r.occupants is self, Region.objects),
-            )))),
+            ("Income", "$ {}".format(self.get_income())),
         )).render())
-
-    def get_friendly_regions(self):
-        return filter(
-            lambda r: r.occupants is self or r.occupants.name in self.allies,
-            Region.objects,
-        )
-
-    def get_hostile_regions(self):
-        return filter(
-            lambda r: r.occupants.name in self.enemies,
-            Region.objects,
-        )
-
-    def get_allies(self):
-        return filter(
-            lambda n: n.name in self.allies,
-            self.objects,
-        )
-
-    def get_enemies(self):
-        return filter(
-            lambda n: n.name in self.enemies,
-            self.objects,
-        )
