@@ -9,12 +9,15 @@ from .regions import Region
 class Nation(object):
     objects = []
 
-    def __init__(self, name, race, ordering, resources=1000, computer=True):
+    def __init__(self, name, race, ordering, allies, enemies, resources=1000, computer=True):
         self.objects.append(self)
 
         self.name = name
         self.race = race
         self.army = []
+
+        self.allies = allies
+        self.enemies = enemies
 
         self.resources = resources
         self.computer = computer
@@ -38,3 +41,27 @@ class Nation(object):
                 filter(lambda r: r.occupants is self, Region.objects),
             )))),
         )).render())
+
+    def get_friendly_regions(self):
+        return filter(
+            lambda r: r.occupants is self or r.occupants.name in self.allies,
+            Region.objects,
+        )
+
+    def get_hostile_regions(self):
+        return filter(
+            lambda r: r.occupants.name in self.enemies,
+            Region.objects,
+        )
+
+    def get_allies(self):
+        return filter(
+            lambda n: n.name in self.allies,
+            self.objects,
+        )
+
+    def get_enemies(self):
+        return filter(
+            lambda n: n.name in self.enemies,
+            self.objects,
+        )

@@ -54,8 +54,20 @@ class Region(object):
 
     def get_neighbors(self):
         return filter(
-            lambda x: x.name in self.neighbors,
+            lambda r: r.name in self.neighbors,
             self.objects,
+        )
+
+    def get_friendly_neighbors(self, nation):
+        return filter(
+            lambda r: r.occupants is nation or r.occupants.name in nation.allies,
+            self.get_neighbors(),
+        )
+
+    def get_hostile_neighbors(self, nation):
+        return filter(
+            lambda r: r.occupants.name in nation.enemies,
+            self.get_neighbors(),
         )
 
     def get_report(self):
