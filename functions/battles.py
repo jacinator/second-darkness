@@ -1,7 +1,7 @@
 from random import choice
 
 def get_damage(army, type):
-    return sum(getattr(u, "get_{}_damage".format(type)) for u, c in army.items() for _ in range(c))
+    return sum(getattr(u, "get_{}_damage".format(type))() for u, c in army.items() for _ in range(c))
 
 def get_casualties(a, b, type):
     casualties = {}

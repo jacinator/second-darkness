@@ -8,15 +8,11 @@ from functions.strings import capitalize
 from functions.tables import Table, TableList
 
 
-def get_unit_table_render(units):
-    return Table([("Name", "Number", "Offense", "Defense")] + [
-        (u.name, c, u.offense, u.defense)
+def get_unit_table_render(region, units):
+    return Table([("Name", "Number", "Offense", "Defense", "Region")] + [
+        (u.name, c, u.offense, u.defense, region.name)
         for u, c in units.items()
     ]).render()
-
-
-def get_unit_row(args):
-    return (args[0].name, args[1], args[0].offense, args[0].defense)
 
 
 def clean_units(method):
@@ -68,7 +64,7 @@ class Region(object):
         if nation is None:
             nation = self.occupants
 
-        return get_unit_table_render({u: c for u, c in self.army.items() if nation in u.nations})
+        return get_unit_table_render(self, {u: c for u, c in self.army.items() if nation in u.nations})
 
     # ##### Information Retrieval ##### #
     # These methods are here to get and return information about this
@@ -125,7 +121,7 @@ class Region(object):
     @action("Attack")
     def action_attack(self, nation):
         try:
-            menu = ObjectMenu(self.get_hostile_neighbors())
+            menu = ObjectMenu(self.get_hostile_neighbors(nation))
             against = menu.choose()
 
             self.attack_enemy(nation, against)
@@ -134,6 +130,7 @@ class Region(object):
                 self.get_units_report(),
                 against.get_units_report(),
             ).render())
+            input("Press enter to continue")
         except EmptyChoicesError:
             print("{} cannot attack from {} - there aren't any enemies nearby!".format(
                 capitalize(nation.name),
@@ -143,11 +140,12 @@ class Region(object):
     @action("Details")
     def action_details(self, nation):
         print(self.get_neighbor_reports())
+        input("Press enter to continue")
 
     @action("Move")
     def action_move(self, nation):
         try:
-            menu = ObjectMenu(self.get_friendly_neighbors())
+            menu = ObjectMenu(self.get_friendly_neighbors(nation))
             to = menu.choose()
 
             self.move_units(nation, to)
@@ -155,7 +153,8 @@ class Region(object):
                 "Unit statuses",
                 to.get_units_report(),
                 self.get_units_report(),
-            ))
+            ).render())
+            input("Press enter to continue")
         except EmptyChoicesError:
             print("{} cannot move from {} - there aren't any friendly regions nearby!".format(
                 capitalize(nation.name),
@@ -165,6 +164,7 @@ class Region(object):
     @action("Review")
     def action_review(self, nation):
         print(self.get_units_report(nation))
+        input("Press enter to continue")
 
     @action("Recruit")
     def action_recruit(self, nation):
@@ -201,3 +201,4 @@ class Region(object):
             "Recruited these units",
             get_unit_table_render(units),
         ).render())
+        input("Press enter to continue")

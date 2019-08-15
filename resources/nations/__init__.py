@@ -48,6 +48,7 @@ arnor = nations.Nation(
       names.mordor,
       names.moria,
    ],
+   computer=False,
 )
 
 dol_amroth = nations.Nation(
