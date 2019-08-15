@@ -32,7 +32,10 @@ class Nation(object):
     # Nation object.
 
     def get_income(self):
-        return sum(r.resources for r in Region.objects if r.occupants is self)
+        return sum(r.resources for r in self.get_regions())
+
+    def get_regions(self):
+        return (r for r in Region.objects if r.occupants is self)
 
     # ##### Menu Actions ##### #
     # These methods are put in place to allow the NationActionMenu to
@@ -40,7 +43,7 @@ class Nation(object):
 
     @action("Regions")
     def action_nations(self):
-        region_menu = ObjectMenu((r for r in Region.objects if r.occupants is self))
+        region_menu = ObjectMenu(self.get_regions())
         action_menu = RegionActionMenu(self, region_menu.choose())
         action_menu.choose()
 
