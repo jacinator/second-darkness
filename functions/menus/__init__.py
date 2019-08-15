@@ -11,8 +11,8 @@ class ActionMenu(bases.MainMenu):
 
 class ObjectMenu(bases.MainMenu):
 
-    def __init__(self, object_list, filter_func=None):
-        choices = tuple(filter(filter_func, object_list))
+    def __init__(self, object_iter):
+        choices = tuple(object_iter)
         super().__init__(choices)
 
 

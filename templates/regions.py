@@ -1,15 +1,26 @@
-import functools
+from functools import wraps
 
-from functions import battles, strings, tables
-from functions.menus import ObjectMenu, decorators, errors
+from functions.battles import battle
+from functions.menus import ObjectMenu
+from functions.menus.decorators import action
+from functions.menus.errors import EmptyChoicesError
+from functions.strings import capitalize
+from functions.tables import Table, TableList
+
+
+def get_unit_table_render(units):
+    return Table([("Name", "Number", "Offense", "Defense")] + [
+        (u.name, c, u.offense, u.defense)
+        for u, c in units.items()
+    ]).render()
 
 
 def get_unit_row(args):
-    return (args[0].name, args[1], args[0].offense, args[0].defense,)
+    return (args[0].name, args[1], args[0].offense, args[0].defense)
 
 
 def clean_units(method):
-    @functools.wraps(method)
+    @wraps(method)
     def inner(self, units):
         for unit, count in units.items():
             method(self, unit, count)
@@ -34,9 +45,47 @@ class Region(object):
     def __str__(self):
         return self.name
 
-    def _clean_army(self):
-        for unit in [u for u, c in self.army.items() if c <= 0]:
-            del self.army[unit]
+    def get_report(self):
+        return Table((
+            ("Name", capitalize(self.name)),
+            ("Occupants", capitalize(self.occupants.name)),
+            ("Inhabitants", capitalize(self.occupants.race.plural)),
+            ("Resources", "+ {}".format(self.resources)),
+            ("Strength", "! {}".format(sum(self.army.values()))),
+        )).render()
+
+    def get_neighbor_reports(self):
+        return TableList(
+            "{} and {} neighboring regions".format(
+                capitalize(self.name),
+                len(self.neighbors),
+            ),
+            self.get_report(),
+            *map(Region.get_report, self.get_neighbors()),
+        ).render()
+
+    def get_units_report(self, nation=None):
+        if nation is None:
+            nation = self.occupants
+
+        return get_unit_table_render({u: c for u, c in self.army.items() if nation in u.nations})
+
+    # ##### Information Retrieval ##### #
+    # These methods are here to get and return information about this
+    # Nation object.
+
+    def get_neighbors(self):
+        return (r for r in self.objects if r.name in self.neighbors)
+
+    def get_friendly_neighbors(self, nation):
+        return (r for r in self.get_neighbors() if r.occupants.name in nation.allies or r.occupants is nation)
+
+    def get_hostile_neighbors(self, nation):
+        return (r for r in self.get_neighbors() if r.occupants.name in nation.enemies)
+
+    # ##### Object Manipulation ##### #
+    # These methods are for changing or modifying the data sotred on
+    # the class instance.
 
     @clean_units
     def add_units(self, unit, count):
@@ -52,57 +101,6 @@ class Region(object):
         except KeyError:
             pass
 
-    def get_neighbors(self):
-        return filter(
-            lambda r: r.name in self.neighbors,
-            self.objects,
-        )
-
-    def get_friendly_neighbors(self, nation):
-        return filter(
-            lambda r: r.occupants is nation or r.occupants.name in nation.allies,
-            self.get_neighbors(),
-        )
-
-    def get_hostile_neighbors(self, nation):
-        return filter(
-            lambda r: r.occupants.name in nation.enemies,
-            self.get_neighbors(),
-        )
-
-    def get_report(self):
-        return tables.Table((
-            ("Name", strings.capitalize(self.name)),
-            ("Occupants", strings.capitalize(self.occupants.name)),
-            ("Inhabitants", strings.capitalize(self.occupants.race.plural)),
-            ("Resources", "+ {}".format(self.resources)),
-            ("Strength", "! {}".format(self.get_strength())),
-        )).render()
-
-    def get_neighbor_reports(self):
-        return tables.TableList(
-            "{} and {} neighboring regions".format(
-                strings.capitalize(self.name),
-                len(self.neighbors),
-            ),
-            self.get_report(),
-            *map(Region.get_report, self.get_neighbors()),
-        ).render()
-
-    def get_strength(self):
-        return sum(self.army.values())
-
-    def get_units_report(self, nation=None):
-        if nation is None:
-            nation = self.occupants
-
-        heading = [("Name", "Number", "Offense", "Defense")]
-        content = list(map(get_unit_row, [x for x in self.army.items() if nation in x[0].nations]))
-        return tables.Table(heading + content).render()
-
-    def has_army(self):
-        return len(self.army.keys())
-
     def move_units(self, nation, to):
         units = {}
 
@@ -113,60 +111,64 @@ class Region(object):
         to.add_units(units)
         self.sub_units(units)
 
-    @decorators.action("Attack")
+    def attack_enemy(self, nation, against):
+        battle(nation, self, against)
+
+        if not len(against.army.keys()):
+            against.occupants = self.occupants
+            self.move_units(nation, against)
+
+    # ##### Menu Actions ##### #
+    # These methods are put in place to allow the RegionActionMenu to
+    # properly manipulate and get information from Region objects.
+
+    @action("Attack")
     def action_attack(self, nation):
         try:
-            against = ObjectMenu(
-                self.objects,
-                lambda r: r.occupants != nation and r.name in self.neighbors,
-            ).choose()
-        except errors.EmptyChoicesError:
-            print("{} cannot attack from {} - there aren't any enemies nearby!".format(
-                strings.capitalize(nation.name),
-                self.name,
-            ))
-        else:
-            battles.battle(nation, self, against)
+            menu = ObjectMenu(self.get_hostile_neighbors())
+            against = menu.choose()
 
-            if not against.has_army():
-                against.occupants = self.occupants
-                self.move_units(nation, against)
-
-            print(tables.TableList(
+            self.attack_enemy(nation, against)
+            print(TableList(
                 "Unit statuses",
                 self.get_units_report(),
                 against.get_units_report(),
             ).render())
+        except EmptyChoicesError:
+            print("{} cannot attack from {} - there aren't any enemies nearby!".format(
+                capitalize(nation.name),
+                self.name,
+            ))
 
-    @decorators.action("Details")
+    @action("Details")
     def action_details(self, nation):
         print(self.get_neighbor_reports())
 
-    @decorators.action("Move")
+    @action("Move")
     def action_move(self, nation):
         try:
-            to = ObjectMenu(
-                self.objects,
-                lambda r: r.occupants == nation and r.name in self.neighbors,
-            ).choose()
-        except errors.EmptyChoicesError:
+            menu = ObjectMenu(self.get_friendly_neighbors())
+            to = menu.choose()
+
+            self.move_units(nation, to)
+            print(TableList(
+                "Unit statuses",
+                to.get_units_report(),
+                self.get_units_report(),
+            ))
+        except EmptyChoicesError:
             print("{} cannot move from {} - there aren't any friendly regions nearby!".format(
-                strings.capitalize(nation.name),
+                capitalize(nation.name),
                 self.name,
             ))
-        else:
-            self.move_units(nation, to)
 
-    @decorators.action("Review")
+    @action("Review")
     def action_review(self, nation):
         print(self.get_units_report(nation))
 
-    @decorators.action("Recruit")
+    @action("Recruit")
     def action_recruit(self, nation):
-        unit_menu = ObjectMenu(
-            nation.army,
-            lambda u: u.developed <= self.developed,
-        )
+        unit_menu = ObjectMenu((u for u in nation.army if u.developed <= self.developed))
         units = {}
         _continue = "Y"
 
@@ -195,7 +197,7 @@ class Region(object):
                 nation.resources -= unit.cost * count
         self.add_units(units)
 
-        print(tables.TableList("Recruited these units", tables.Table((
-            ("Name", "Count", "Offense", "Defense",),
-            *map(get_unit_row, units.items()),
-        )).render()).render())
+        print(TableList(
+            "Recruited these units",
+            get_unit_table_render(units),
+        ).render())

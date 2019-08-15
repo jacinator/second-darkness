@@ -40,7 +40,7 @@ class Nation(object):
 
     @action("Regions")
     def action_nations(self):
-        region_menu = ObjectMenu(Region.objects, lambda r: r.occupants is self)
+        region_menu = ObjectMenu((r for r in Region.objects if r.occupants is self))
         action_menu = RegionActionMenu(self, region_menu.choose())
         action_menu.choose()
 
