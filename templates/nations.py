@@ -49,7 +49,7 @@ class Nation(object):
     # properly manipulate and get information from Nation objects.
 
     @action("Regions")
-    def action_nations(self):
+    def action_regions(self):
         region_menu = ObjectMenu(self.get_regions())
         action_menu = RegionActionMenu(self, region_menu.choose())
         action_menu.choose()
