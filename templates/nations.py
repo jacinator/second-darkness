@@ -10,7 +10,7 @@ from .regions import Region
 class Nation(object):
     objects = []
 
-    def __init__(self, name, race, ordering, allies, enemies, resources=1000, computer=True):
+    def __init__(self, name, race, ordering, allies, enemies, computer=True):
         self.objects.append(self)
 
         self.name = name
@@ -20,7 +20,7 @@ class Nation(object):
         self.allies = allies
         self.enemies = enemies
 
-        self.resources = resources
+        self.resources = 0
         self.computer = computer
         self.ordering = ordering
 
