@@ -37,6 +37,13 @@ class Nation(object):
     def get_regions(self):
         return (r for r in Region.objects if r.occupants is self)
 
+    # ##### Object Manipulation ##### #
+    # These methods are for changing or modifying the data stored on
+    # the class instance.
+
+    def collect_income(self):
+        self.resources += self.get_income()
+
     # ##### Menu Actions ##### #
     # These methods are put in place to allow the NationActionMenu to
     # properly manipulate and get information from Nation objects.
@@ -53,3 +60,4 @@ class Nation(object):
             ("Resources", "$ {}".format(self.resources)),
             ("Income", "$ {}".format(self.get_income())),
         )).render())
+        input("Press enter to continue")

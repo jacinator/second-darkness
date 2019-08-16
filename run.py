@@ -11,9 +11,10 @@ import resources.regions
 def run(won=False):
     while won is False:
         for nation in sorted(Nation.objects, key=operator.attrgetter("ordering")):
+            nation.collect_income()
 
             if not nation.computer:
-                print(f"\n{nation.name}'s turn")
+                print(f"\n{nation.name}'s turn\n+ $ {nation.get_income()}\n")
                 menu = NationActionMenu(nation)
                 menu.choose()
                 print()
