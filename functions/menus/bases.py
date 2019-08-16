@@ -71,4 +71,8 @@ class MainMenu(BaseMenu):
     def choose(self):
         print(self.render())
         choice = input("> ")
+
+        if choice.upper() == 'EXIT':
+            exit()
+
         return self.get_value(choice)
