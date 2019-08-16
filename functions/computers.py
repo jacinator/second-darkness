@@ -12,11 +12,11 @@ def _computer_choose(objects, get_weight):
     weights = [get_weight(c) for c in objects]
     return choices(objects, _normalize_weights(weights))[0]
 
-def _is_player_or_ally(nation):
-    return not nation.computer or not all(a.computer for a in Nation.objects if a.name in nation.allies)
+def _is_player(nation):
+    return not nation.computer
 
 def _is_region_visible(region):
-    return _is_player_or_ally(region.occupants) or any(_is_player_or_ally(n.occupants) for n in region.get_neighbors())
+    return _is_player(region.occupants) or any(_is_player(n.occupants) for n in region.get_neighbors())
 
 def choose_friendly_neighbor(nation, region):
     return _computer_choose(
